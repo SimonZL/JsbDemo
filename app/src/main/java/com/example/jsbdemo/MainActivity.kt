@@ -5,6 +5,7 @@ import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.webkit.SslErrorHandler
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -18,12 +19,14 @@ import com.github.lzyzsd.jsbridge.DefaultHandler
 class MainActivity : AppCompatActivity() {
 
     private var mWebView: BridgeWebView? = null
+    private var mTv: TextView? = null;
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         mWebView = findViewById(R.id.webview)
+        mTv = findViewById(R.id.btn)
         mWebView?.apply {
             setDefaultHandler(DefaultHandler())
             settings.allowFileAccess = true
@@ -41,7 +44,7 @@ class MainActivity : AppCompatActivity() {
             // 进行缩放
             settings.builtInZoomControls = true
             // 设置UserAgent
-            settings.userAgentString = settings.userAgentString + "app"
+            settings.userAgentString += "app"
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 // 解决 Android 5.0 上 WebView 默认不允许加载 Http 与 Https 混合内容
@@ -51,13 +54,14 @@ class MainActivity : AppCompatActivity() {
                 // 修复 页面还没加载完成，注册代码还没初始完成，就调用了callHandle
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
+//                    mTv?.visibility = View.GONE
                 }
 
                 override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler, error: SslError?) {
                     handler.proceed() // 接受所有网站的证书
                 }
             }
-            loadUrl("http://192.168.0.106:7456/web-mobile/web-mobile/index.html")
+//            loadUrl("http://192.168.0.106:7456/web-mobile/web-mobile/index.html")
         }
         // 注册Native方法供JS调用
         mWebView?.registerHandler(
@@ -71,7 +75,7 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        findViewById<TextView>(R.id.btn).setOnClickListener {
+        mTv?.setOnClickListener {
             //调用js
             mWebView?.callHandler(
                 "nativeToJs",
